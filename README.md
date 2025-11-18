@@ -6,9 +6,6 @@ Este projeto implementa tres problemas classicos de concorrencia em sistemas ope
 2. Contador Concorrente - Condicao de corrida e semaforos
 3. Deadlock Simples - Reproducao e correcao de impasses
 
-## Integrantes do Grupo
-- [Nomes dos integrantes]
-
 ## Estrutura do Projeto
 ```
 projeto/
@@ -76,23 +73,25 @@ Multiplas threads incrementando um contador compartilhado sem sincronizacao resu
 ## Resultados e Analises
 
 ### Jantar dos Filosofos
-- Versao com deadlock: Eventualmente trava quando todos os filosofos pegam o garfo esquerdo simultaneamente
-- Versao corrigida: Execucao continua sem impasses devido a hierarquia de recursos
+- Versao com deadlock: Eventualmente trava quando todos os filosofos pegam o garfo esquerdo simultaneamente (espera circular)
+- Versao corrigida: Execucao continua indefinidamente sem impasses devido a hierarquia de recursos (ordem global de aquisicao)
 
 ### Contador Concorrente
-- Sem controle: Valor final incorreto (condicao de corrida)
-- Com semaforo: Valor correto (2.000.000) com overhead de tempo
+- Sem sincronizacao: Valor final incorreto devido a condicao de corrida (perda de incrementos)
+- Com semaforo: Valor correto (2.000.000) com overhead de tempo devido a serializacao dos acessos
+- FIFO garante que threads sao atendidas na ordem de chegada, evitando starvation
 
 ### Deadlock Simples
-- Reproducao: Threads travam em espera circular
-- Correcao: Execucao normal com ordem global
+- Reproducao: Threads travam em espera circular (Thread 1 segura A e espera B, Thread 2 segura B e espera A)
+- Correcao: Execucao normal com ordem global (sempre A antes de B), impossivel formar ciclo
 
 ## Conclusoes
 
 1. Deadlock requer todas as 4 condicoes de Coffman simultaneamente
-2. Hierarquia de recursos e eficaz para quebrar espera circular
-3. Semaforos resolvem condicoes de corrida mas impactam performance
-4. Ordem de aquisicao e crucial para evitar impasses
+2. Hierarquia de recursos e eficaz para quebrar espera circular (ordem global)
+3. Semaforos resolvem condicoes de corrida mas impactam performance (serializacao)
+4. Ordem de aquisicao e crucial para evitar impasses (evita ciclos de espera)
+5. FIFO nos semaforos garante justiça e evita starvation em cenarios concorrentes
 
 ## Referencias
 1. Wikipedia - Dining Philosophers Problem
@@ -100,5 +99,5 @@ Multiplas threads incrementando um contador compartilhado sem sincronizacao resu
 3. Wikipedia - Deadlock (Computer Science)
 4. Condicoes de Coffman para Deadlock
 
-Link do Video Explicativo: [inserir URL aqui]
+Link do Video Explicativo: 
 ```
