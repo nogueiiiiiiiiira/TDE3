@@ -1,4 +1,3 @@
-```markdown
 # 🍽️ Trabalho de Sistemas Operacionais - Concorrência e Deadlock
 
 ## 📋 Descrição do Projeto
