@@ -13,7 +13,7 @@ public class FilosofoComDeadlock extends Thread {
     }
 
     public void run() {
-        while (true) {
+        for (int i = 0; i < 5; i++) { // Limitado a 5 iteracoes para demonstracao
             pensar();
             estado = "com fome";
             System.out.println("Filosofo " + id + " esta " + estado + " e quer comer!");
@@ -32,6 +32,7 @@ public class FilosofoComDeadlock extends Thread {
             }
             System.out.println("Filosofo " + id + " soltou o garfo " + garfoEsquerdo.getNumero());
         }
+        System.out.println("Filosofo " + id + " finalizou sua simulacao apos 5 iteracoes.");
     }
 
     private void pensar() {

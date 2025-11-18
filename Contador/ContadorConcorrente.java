@@ -1,123 +1,87 @@
 package Contador;
-import java.util.concurrent.Semaphore;
-import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class ContadorConcorrente {
-    static int contadorSemSincronizacao = 0;
-    static int contadorComSincronizacao = 0;
-    static int totalThreads = 8;
-    static int incrementosPorThread = 250000;
-    static Semaphore semaforo = new Semaphore(1, true);
-
-    public void executarSemControle() {
-        contadorSemSincronizacao = 0;
-        ArrayList<Thread> listaDeThreads = new ArrayList<Thread>();
-
-        int indiceCriacaoThread = 0;
-        while (indiceCriacaoThread < totalThreads) {
-            Thread threadNova = new Thread(new Runnable() {
-                public void run() {
-                    int indiceIncremento = 0;
-                    while (indiceIncremento < incrementosPorThread) {
-                        contadorSemSincronizacao = contadorSemSincronizacao + 1;
-                        indiceIncremento = indiceIncremento + 1;
-                    }
-                }
-            });
-            listaDeThreads.add(threadNova);
-            indiceCriacaoThread = indiceCriacaoThread + 1;
-        }
-
-        long inicio = System.nanoTime();
-        int indiceInicioThread = 0;
-        while (indiceInicioThread < totalThreads) {
-            Thread threadParaIniciar = listaDeThreads.get(indiceInicioThread);
-            threadParaIniciar.start();
-            indiceInicioThread = indiceInicioThread + 1;
-        }
-        try {
-            int indiceJuncaoThread = 0;
-            while (indiceJuncaoThread < totalThreads) {
-                Thread threadParaAguardar = listaDeThreads.get(indiceJuncaoThread);
-                threadParaAguardar.join();
-                indiceJuncaoThread = indiceJuncaoThread + 1;
-            }
-        } catch (Exception e) {
-            Thread.currentThread().interrupt();
-        }
-        long fim = System.nanoTime();
-
-        int valorEsperado = totalThreads * incrementosPorThread;
-        int valorObtido = contadorSemSincronizacao;
-        double tempoDecorrido = (fim - inicio) / 1000000000.0;
-        System.out.println("Sem controle: Esperado = " + valorEsperado
-                + ", Obtido = " + valorObtido
-                + ", Tempo = " + tempoDecorrido + "s");
-    }
-
-    public void executarComSemaforo() {
-        contadorComSincronizacao = 0;
-        ArrayList<Thread> listaDeThreads = new ArrayList<Thread>();
-
-        int indiceCriacaoThread = 0;
-        while (indiceCriacaoThread < totalThreads) {
-            Thread threadNova = new Thread(new Runnable() {
-                public void run() {
-                    int indiceIncremento = 0;
-                    while (indiceIncremento < incrementosPorThread) {
-                        try {
-                            semaforo.acquire();
-                            contadorComSincronizacao = contadorComSincronizacao + 1;
-                            semaforo.release();
-                        } catch (Exception e) {
-                            Thread.currentThread().interrupt();
-                        }
-                        indiceIncremento = indiceIncremento + 1;
-                    }
-                }
-            });
-            listaDeThreads.add(threadNova);
-            indiceCriacaoThread = indiceCriacaoThread + 1;
-        }
-
-        long inicio = System.nanoTime();
-        int indiceInicioThread = 0;
-        while (indiceInicioThread < totalThreads) {
-            Thread threadParaIniciar = listaDeThreads.get(indiceInicioThread);
-            threadParaIniciar.start();
-            indiceInicioThread = indiceInicioThread + 1;
-        }
-        try {
-            int m = 0;
-            while (m < totalThreads) {
-                Thread threadParaAguardar = listaDeThreads.get(m);
-                threadParaAguardar.join();
-                m = m + 1;
-            }
-        } catch (Exception e) {
-            Thread.currentThread().interrupt();
-        }
-        
-        long fim = System.nanoTime();
-
-        int valorEsperado = totalThreads * incrementosPorThread;
-        int valorObtido = contadorComSincronizacao;
-        double tempoDecorrido = (fim - inicio) / 1000000000.0;
-        System.out.println("Com semaforo: Esperado = " + valorEsperado
-                + ", Obtido = " + valorObtido
-                + ", Tempo = " + tempoDecorrido + "s");
-    }
+    static int contadorCompartilhado = 0;
+    static final java.util.concurrent.Semaphore semaforo = new java.util.concurrent.Semaphore(1, true);
 
     public void executarTeste() {
-        System.out.println("\n=== CONTADOR CONCORRENTE ===");
-        String textoThreads = "Threads: " + totalThreads;
-        String textoIncrementos = ", Incrementos por thread: " + incrementosPorThread;
-        System.out.println(textoThreads + textoIncrementos);
-        executarSemControle();
+        System.out.println("\n=== DEMONSTRANDO CONDICAO DE CORRIDA (SEM SINCRONIZACAO) ===");
+        executarSemSincronizacao();
+
+        // Reset contador
+        contadorCompartilhado = 0;
+
+        System.out.println("\n=== VERSAO CORRIGIDA COM SEMAFORO ===");
+        executarComSincronizacao();
+    }
+
+    private void executarSemSincronizacao() {
+        int numeroDeThreads = 8;
+        int incrementosPorThread = 250_000;
+        ExecutorService pool = Executors.newFixedThreadPool(numeroDeThreads);
+
+        Runnable tarefa = new Runnable() {
+            public void run() {
+                for (int i = 0; i < incrementosPorThread; i++) {
+                    contadorCompartilhado++; 
+                }
+            }
+        };
+
+        long tempoInicio = System.nanoTime();
+        for (int i = 0; i < numeroDeThreads; i++) {
+            pool.submit(tarefa);
+        }
+        pool.shutdown();
         try {
-            executarComSemaforo();
-        } catch (Exception e) {
+            pool.awaitTermination(1, TimeUnit.MINUTES);
+        } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
+
+        long tempoFim = System.nanoTime();
+        System.out.printf("Esperado=%d, Obtido=%d, Tempo=%.3fs%n",
+        numeroDeThreads * incrementosPorThread, contadorCompartilhado, (tempoFim - tempoInicio) / 1000000000.0);
+        System.out.println("Nota: Valor obtido pode ser menor devido a condicao de corrida (perda de incrementos).");
+    }
+
+    private void executarComSincronizacao() {
+        int numeroDeThreads = 8;
+        int incrementosPorThread = 250_000;
+        ExecutorService pool = Executors.newFixedThreadPool(numeroDeThreads);
+
+        Runnable tarefa = new Runnable() {
+            public void run() {
+                for (int i = 0; i < incrementosPorThread; i++) {
+                    try {
+                        semaforo.acquire();
+                        contadorCompartilhado++;
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    } finally {
+                        semaforo.release();
+                    }
+                }
+            }
+        };
+
+        long tempoInicio = System.nanoTime();
+        for (int i = 0; i < numeroDeThreads; i++) {
+            pool.submit(tarefa);
+        }
+        pool.shutdown();
+        try {
+            pool.awaitTermination(1, TimeUnit.MINUTES);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+
+        long tempoFim = System.nanoTime();
+        System.out.printf("Esperado=%d, Obtido=%d, Tempo=%.3fs%n",
+        numeroDeThreads * incrementosPorThread, contadorCompartilhado, (tempoFim - tempoInicio) / 1000000000.0);
+        System.out.println("Nota: Valor correto devido a exclusao mutua garantida pelo semaforo.");
     }
 }

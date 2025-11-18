@@ -77,6 +77,8 @@ public class Menu {
             System.out.println("Teste interrompido: " + e.getMessage());
             Thread.currentThread().interrupt();
         }
+        System.out.println("\nPressione Enter para voltar ao menu principal...");
+        scanner.nextLine();
     }
 
     private void menuDeadlock() {
@@ -96,5 +98,7 @@ public class Menu {
             System.out.println("Entrada invalida!");
             scanner.nextLine();
         }
+        System.out.println("\nPressione Enter para voltar ao menu principal...");
+        scanner.nextLine();
     }
 }
