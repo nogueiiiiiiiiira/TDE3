@@ -23,7 +23,7 @@ public class FilosofoComDeadlock extends Thread {
                 synchronized (garfoDireito) {
                     System.out.println("Filosofo " + id + " pegou o garfo " + garfoDireito.getNumero());
                     estado = "comendo";
-                    System.out.println("Filosofo " + id + " esta " + estado + " deliciosamente!");
+                    System.out.println("Filosofo " + id + " esta " + estado + "");
                     comer();
                     estado = "pensando";
                     System.out.println("Filosofo " + id + " terminou de comer e voltou a " + estado);

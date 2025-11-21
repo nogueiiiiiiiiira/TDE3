@@ -33,7 +33,7 @@ public class Filosofo extends Thread {
                 synchronized (segundoGarfo) {
                     System.out.println("Filosofo " + id + " pegou o garfo " + segundoGarfo.getNumero());
                     estado = "comendo";
-                    System.out.println("Filosofo " + id + " esta " + estado + " deliciosamente!");
+                    System.out.println("Filosofo " + id + " esta " + estado + "");
                     comer();
                     estado = "pensando";
                     System.out.println("Filosofo " + id + " terminou de comer e voltou a " + estado);
