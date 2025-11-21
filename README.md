@@ -1,5 +1,8 @@
 # Trabalho de Sistemas Operacionais - Concorrência e Deadlock
 
+## Link do Youtube
+https://youtu.be/RMOH83RD350
+
 ## Descrição do Projeto
 Este projeto implementa **três problemas clássicos de concorrência** em sistemas operacionais, demonstrando problemas de sincronização, deadlock e suas respectivas soluções, conforme especificado na atividade.
 
